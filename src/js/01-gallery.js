@@ -1,29 +1,31 @@
-// Add imports above this line
+import { galleryItems } from './gallery-items.js';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+import SimpleLightbox from 'simplelightbox';
 
-import { galleryItems } from './gallery-items';
-import SimpleLightbox from "simplelightbox/dist/simple-lightbox.esm";
-import "simplelightbox/dist/simple-lightbox.min.css";
+const galleryContainer = document.querySelector('.gallery');
+const galleryMarkup = createGalleryItemsMarkup(galleryItems);
 
+galleryContainer.insertAdjacentHTML('beforeend', galleryMarkup);
 
-const galleryCards = createGalleryMarkup(galleryItems);
-const galleryContainer = document.querySelector(`.gallery`);
-
-galleryContainer.insertAdjacentHTML(`beforeend`, galleryCards);
-
-function createGalleryMarkup(galleryItems) {
-  let i = 0;
-  return galleryItems
-    .map(({ preview, original, description }) => {
-      return `
-      <a class="gallery__item" href="${original}" >
-        <img class="gallery__image" src="${preview}" alt="${description}" title="${description}"/>
-      </a>
-    
+function createGalleryItemsMarkup(items) {
+    return galleryItems
+    .map(({ preview, original, description}) => {
+        return `
+            <div class="gallery__item">
+                <a class="gallery__item" href="${original}" rel='noreferrer noopener nofollow'>
+                    <img class="gallery__image"
+                    src="${preview}"
+                    alt="${description}"
+                    />
+                </a>
+            </div> 
         `;
     })
     .join('');
-}
+};
 
-let lightbox = new SimpleLightbox('.gallery a', {
-  captionDelay: 250,
+let lightboxGallery = new SimpleLightbox('.gallery a', {
+    captionsData: 'alt',
+    captionDelay: 250,
+    // heightRatio: 0.85,
 });
