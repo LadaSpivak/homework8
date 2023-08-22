@@ -1,52 +1,54 @@
 import throttle from 'lodash.throttle';
 
-const feedbackForm = document.querySelector(`.feedback-form`);
+const STORAGE_KEY = 'feedback-form-state';
 
-// Filling form fields with store locale values
+let formData = {};
 
-const fieldsFilling = () => {
-  for (const property in tempObject) {
-    feedbackForm.elements[property].value = tempObject[property];
-  }
+const refs = {
+    form: document.querySelector('.feedback-form'),
+    input: document.querySelector('.feedback-form  input'),
+    textarea: document.querySelector('.feedback-form textarea'),
 };
 
-// Change value in form fields
+refs.form.addEventListener('input', throttle(onInputTextarea, 500));
+refs.form.addEventListener('submit', onFormSubmit);
 
-const changeFormFields = event => {
-  const { target } = event;
-  const fieldValue = target.value;
-  const fieldName = target.name;
-  tempObject[fieldName] = fieldValue;
-  serializeObject();
+initInputTextarea();
+
+function onInputTextarea(event) {
+    formData = {
+        email: refs.input.value.trim(),
+        message: refs.textarea.value.trim(),
+    };
+
+
+    const formDataJSON = JSON.stringify(formData);
+
+    localStorage.setItem(STORAGE_KEY, formDataJSON);
+
 };
 
-// Export to Local Store
+function onFormSubmit(event) {
+    event.preventDefault();
 
-const serializeObject = () =>
-  localStorage.setItem(`feedback-form-state`, JSON.stringify(tempObject));
+   const { email, message } = event.currentTarget.elements;
+   console.log({ email: email.value.trim(), message: message.value.trim() });
 
-// Import from Local Store
+    event.currentTarget.reset();
+    formData = {};
 
-const deserializeObject = () =>
-  JSON.parse(localStorage.getItem(`feedback-form-state`));
-
-// Initialize object variable
-
-let tempObject = deserializeObject() != null ? deserializeObject() : {};
-
-// Submit event
-
-const submitForm = () => {
-  event.preventDefault();
-  localStorage.clear();
-  feedbackForm.reset();
-  console.log(tempObject);
-  tempObject = {};
+    localStorage.removeItem(STORAGE_KEY);
 };
 
-// Main method (Start point)
+function initInputTextarea() {
+    try {
+    const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(savedData) {
+    refs.input.value = savedData.email;
+    refs.textarea.value = savedData.message;
 
-deserializeObject();
-fieldsFilling();
-feedbackForm.addEventListener(`input`, throttle(changeFormFields, 500));
-feedbackForm.lastElementChild.addEventListener(`click`, submitForm);
+    };
+    } catch (error) {
+        return;
+    }
+};
